@@ -4,52 +4,59 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
-from DAE_imputation_v2 import autoencoder_imputation
-from gain_categorical_v2 import gain
+from models.MIDA_v2 import autoencoder_imputation
+from models.GAIN_v2 import gain
+from utils.utils import rmse_loss
 
 if __name__ == '__main__':
-    miss_rate = 0.3
-    num_samples = 200
+    num_samples = 100
+    num_imputations = 10
 
     DAE_parameters = {'learning_rate': 0.001,
-                        'batch_size': 256,
-                        'num_steps_phase1': 100,
-                        'num_steps_phase2': 3,
-                        'theta': 16}
+                        'batch_size': 512,
+                        'num_steps_phase1': 200,
+                        'num_steps_phase2': 2,
+                        'theta': 7}
 
     gain_parameters = {'batch_size': 512,
-                       'hint_rate': 0.15,
-                       'alpha': 5,
-                       'iterations': 100,
-                       'h_Gdim': 32,
-                       'h_Ddim': 32}
+                       'hint_rate': 0.13, # MAR
+                       'alpha': 100,
+                       'iterations': 200
+                       }
 
     # Load data
-    file_name = 'data/house.csv'
-    house_df = pd.read_csv(file_name)
-    data_x = house_df.values.astype(np.float32)
+    file_name = 'data/house_recoded.csv'
+    model_name = "gain"
+    save_name = "house"
+    miss_mechanism = "MAR"
+    data_df = pd.read_csv(file_name)
+    data_x = data_df.values.astype(np.float32)
 
     num_index = list(range(-8, 0))
-    cat_index = list(range(-house_df.shape[1], -8))
+    cat_index = list(range(-data_df.shape[1], -8))
 
     # get all possible levels for categorical variable
     all_levels = [np.unique(x) for x in data_x[:, cat_index].T]
-    all_levels_dict = dict(zip(house_df.columns[cat_index], all_levels))
+    all_levels_dict = dict(zip(data_df.columns[cat_index], all_levels))
 
+    rmse_ls = []
     for i in range(num_samples):
-        file_name = './samples/MCAR/sample_{}.csv'.format(i)
-        miss_data_x = np.loadtxt(file_name, delimiter=",").astype(np.float32)
-        data_m = 1-np.isnan(miss_data_x).astype(np.float32)
+        file_name = './samples/{}/{}/sample_{}.csv'.format(save_name, miss_mechanism, i)
+        data_x_i = np.loadtxt('./samples/{}/complete/sample_{}.csv'.format(save_name, i), delimiter=",").astype(np.float32)
 
-        # imputed_data_x, loss_list = autoencoder_imputation(miss_data_x, data_m,
-        #                                                    cat_index, num_index,
-        #                                                    all_levels, DAE_parameters)
-        imputed_data_x, Gloss_list, Dloss_list = gain(miss_data_x, data_m,
-                                                      cat_index, num_index,
-                                                      all_levels, gain_parameters)
-        plt.plot(Gloss_list)
-        plt.plot(Dloss_list)
-        plt.show()
-        np.savetxt("./results/GAIN/imputed_{}.csv".format(i), imputed_data_x, delimiter=",")
+        miss_data_x = np.loadtxt(file_name, delimiter=",").astype(np.float32)
+        data_m = 1 - np.isnan(miss_data_x).astype(np.float32)
+        if model_name == "mida":
+            imputed_list, loss_list = autoencoder_imputation(miss_data_x, data_m,
+                                                               cat_index, num_index,
+                                                               all_levels, DAE_parameters, 10)
+        if model_name == "gain":
+            imputed_list, Gloss_list, Dloss_list = gain(miss_data_x, data_m,
+                                                          cat_index, num_index,
+                                                          all_levels, gain_parameters, 10)
+
+        for l in range(num_imputations):
+            np.savetxt("./results/{}/{}/{}/imputed_{}_{}.csv".format(save_name, miss_mechanism, model_name, i, l), imputed_list[l], delimiter=",")
+            rmse_ls.append(rmse_loss(data_x_i, imputed_list[l], data_m))
+        print("{} done!".format(i))
