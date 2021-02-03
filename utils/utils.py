@@ -1,24 +1,7 @@
-'''Utility functions for GAIN.
-
-(1) normalization: MinMax Normalizer
-(2) renormalization: Recover the data from normalzied data
-(3) rounding: Handlecategorical variables after imputation
-(4) rmse_loss: Evaluate imputed data in terms of RMSE
-(5) xavier_init: Xavier initialization
-(6) binary_sampler: sample binary random variables
-(7) uniform_sampler: sample uniform random variables
-(8) sample_batch_index: sample random batch index
-'''
-
 # Necessary packages
 import numpy as np
 import tensorflow.compat.v1 as tf
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from sklearn.preprocessing import OneHotEncoder
-
 
 def normalization(data):
     '''Normalize data in [0, 1] range.
