@@ -58,5 +58,4 @@ if __name__ == '__main__':
 
         for l in range(num_imputations):
             np.savetxt("./results/{}/{}/{}/imputed_{}_{}.csv".format(save_name, miss_mechanism, model_name, i, l), imputed_list[l], delimiter=",")
-            rmse_ls.append(rmse_loss(data_x_i, imputed_list[l], data_m))
         print("{} done!".format(i))
