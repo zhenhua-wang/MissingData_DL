@@ -12,4 +12,4 @@ Are deep learning models superior for missing data imputation in large surveys? 
   - breast: https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)
   - credit: https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients
   - news: https://archive.ics.uci.edu/ml/datasets/online+news+popularity
-## Instructions
+## Usage
