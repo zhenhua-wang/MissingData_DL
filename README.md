@@ -3,7 +3,7 @@
 Author: Zhenhua Wang, Olanrewaju Akande, Jason Poulos and Fan Li
 
 ## Paper: 
-Are deep learning models superior for missing data imputation in large surveys?]{Are deep learning models superior for missing data imputation in large surveys? Evidence from an empirical comparison: 
+Are deep learning models superior for missing data imputation in large surveys? Evidence from an empirical comparison: 
 
 ## Datasets:
   - household: https://www2.census.gov/programs-surveys/acs/data/pums/2019/1-Year/
