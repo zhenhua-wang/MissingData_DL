@@ -4,6 +4,8 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
+import pathlib
+import os
 
 from models.MIDA_v2 import autoencoder_imputation
 from models.GAIN_v2 import gain
@@ -26,12 +28,15 @@ if __name__ == '__main__':
                        }
 
     # Load data
-    file_name = 'data/house_recoded.csv'
+    file_name = '../data/house_recoded.csv'
     model_name = "gain"
     save_name = "house"
     miss_mechanism = "MAR"
     data_df = pd.read_csv(file_name)
     data_x = data_df.values.astype(np.float32)
+
+    save_path = "../results/{}/{}".format(save_name, miss_mechanism)
+    pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)
 
     num_index = list(range(-8, 0))
     cat_index = list(range(-data_df.shape[1], -8))
@@ -42,8 +47,8 @@ if __name__ == '__main__':
 
     rmse_ls = []
     for i in range(num_samples):
-        file_name = './samples/{}/{}/sample_{}.csv'.format(save_name, miss_mechanism, i)
-        data_x_i = np.loadtxt('./samples/{}/complete/sample_{}.csv'.format(save_name, i), delimiter=",").astype(np.float32)
+        file_name = '../samples/{}/{}/sample_{}.csv'.format(save_name, miss_mechanism, i)
+        data_x_i = np.loadtxt('../samples/{}/complete/sample_{}.csv'.format(save_name, i), delimiter=",").astype(np.float32)
 
         miss_data_x = np.loadtxt(file_name, delimiter=",").astype(np.float32)
         data_m = 1 - np.isnan(miss_data_x).astype(np.float32)
@@ -57,5 +62,5 @@ if __name__ == '__main__':
                                                           all_levels, gain_parameters, 10)
 
         for l in range(num_imputations):
-            np.savetxt("./results/{}/{}/{}/imputed_{}_{}.csv".format(save_name, miss_mechanism, model_name, i, l), imputed_list[l], delimiter=",")
+            np.savetxt(os.path.join(save_path, "{}/imputed_{}_{}.csv".format(model_name, i, l)), imputed_list[l], delimiter=",")
         print("{} done!".format(i))
