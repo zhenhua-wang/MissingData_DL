@@ -135,46 +135,47 @@ def autoencoder_imputation(data_x, data_m, cat_index, num_index, all_levels, DAE
 
     optimizer = tf.optimizers.Adam(lr=learning_rate, decay=0.0)
 
-    # Start Training
-    # Training phase 1
-    loss_list = []
-    pbar = tqdm(range(num_steps1))
-    for i in pbar:
-        # create mini batch
-        indices = np.arange(no)
-        np.random.shuffle(indices)
-        for start_idx in range(0, no - batch_size + 1, batch_size):
-            batch_idx = indices[start_idx:start_idx + batch_size]
-            batch_x = data_train[batch_idx, :]
-            batch_m = data_train_m[batch_idx, :]
-
-            # Run optimization op (backprop) and cost op (to get loss value)
-            l, y_hat = optimize_step(batch_x, batch_m)
-            pbar.set_description("loss at epoch {}: {:.3f}, phase 1".format(i, l))
-            loss_list.append(l)
-
-    imputed_data = decoder(encoder(data_train))
-    imputed_data = data_train_m * data_train + (1 - data_train_m) * imputed_data
-
-    # Training phase 2
-    pbar = tqdm(range(num_steps2))
-    for i in pbar:
-        # create mini batch
-        indices = np.arange(no)
-        np.random.shuffle(indices)
-        for start_idx in range(0, no - batch_size + 1, batch_size):
-            batch_idx = indices[start_idx:start_idx + batch_size]
-            batch_x = tf.gather(imputed_data, batch_idx, axis=0)
-            batch_m = data_train_m[batch_idx, :]
-
-            # Run optimization op (backprop) and cost op (to get loss value)
-            l, y_hat = optimize_step(batch_x, batch_m)
-            pbar.set_description("loss at epoch {}, phase 2: {:.3f}".format(i, l))
-            loss_list.append(l)
-
     # multiple imputation
     imputed_list = []
     for l in range(num_imputations):
+        # Start Training
+        # Training phase 1
+        loss_list = []
+        pbar = tqdm(range(num_steps1))
+        for i in pbar:
+            # create mini batch
+            indices = np.arange(no)
+            np.random.shuffle(indices)
+            for start_idx in range(0, no - batch_size + 1, batch_size):
+                batch_idx = indices[start_idx:start_idx + batch_size]
+                batch_x = data_train[batch_idx, :]
+                batch_m = data_train_m[batch_idx, :]
+
+                # Run optimization op (backprop) and cost op (to get loss value)
+                l, y_hat = optimize_step(batch_x, batch_m)
+                pbar.set_description("loss at epoch {}: {:.3f}, phase 1".format(i, l))
+                loss_list.append(l)
+
+        imputed_data = decoder(encoder(data_train))
+        imputed_data = data_train_m * data_train + (1 - data_train_m) * imputed_data
+
+        # Training phase 2
+        pbar = tqdm(range(num_steps2))
+        for i in pbar:
+            # create mini batch
+            indices = np.arange(no)
+            np.random.shuffle(indices)
+            for start_idx in range(0, no - batch_size + 1, batch_size):
+                batch_idx = indices[start_idx:start_idx + batch_size]
+                batch_x = tf.gather(imputed_data, batch_idx, axis=0)
+                batch_m = data_train_m[batch_idx, :]
+
+                # Run optimization op (backprop) and cost op (to get loss value)
+                l, y_hat = optimize_step(batch_x, batch_m)
+                pbar.set_description("loss at epoch {}, phase 2: {:.3f}".format(i, l))
+                loss_list.append(l)
+
+        # get imputation
         imputed_data = decoder(encoder(imputed_data))
         imputed_data = data_train_m * data_train + (1 - data_train_m) * imputed_data
 
