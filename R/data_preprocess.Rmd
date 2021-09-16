@@ -1,0 +1,119 @@
+---
+title: "ACS house data preprocess"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# some libraries
+
+```{r cars}
+library(tidyverse)
+source("./data_loader.R")
+```
+
+# parameters
+
+```{r}
+save_dir = "../data"
+year = 2018
+```
+
+
+# dowload and merge house and person data
+
+```{r}
+acs_downloader(year, save_dir)
+merged = acs_merge(year, save_dir, TRUE)
+```
+
+# preprocessing
+
+```{r}
+house = merged %>%
+  dplyr::select(c(ACR, BDSP, BLD, HHL, HHT, HUGCL, HUPAC, HUPAOC, HUPARC, LNGI,
+                  MULTG, MV, NP, NR, PARTNER, PSF, R18, R65, RMSP, SRNT, SVAL, 
+                  TEN, VEH, WIF, YBL, 
+                  AGEP, COW, HINS1, HINS2, HINS3, JWMNP, JWRIP, JWTR, MAR, MARHT, PAOC, PWGTP, RAC1P,
+                  SCHL, SEX, WAGP, WKHP,
+                  LAPTOP, DIS, PRIVCOV, PUBCOV)) %>%
+  filter(
+    # house data
+    !is.na(HHL),
+    !is.na(HHT),
+    !is.na(HUPAC),
+    !is.na(HUPAOC),
+    !is.na(HUPARC),
+    !is.na(LNGI),
+    !is.na(MULTG),
+    !is.na(MV),
+    !is.na(NP),
+    !is.na(NR),
+    !is.na(PARTNER),
+    !is.na(PSF),
+    !is.na(R18),
+    !is.na(R65),
+    !is.na(RMSP),
+    !is.na(TEN),
+    !is.na(VEH),
+    !is.na(YBL))
+```
+
+```{r}
+# recode NAs
+house$ACR = car::recode(house$ACR, "NA=0")
+house$COW = car::recode(house$COW, "NA=0")
+house$WIF = car::recode(house$WIF, "NA=0")
+house$JWMNP = car::recode(house$JWMNP, "NA=0")
+house$JWRIP = car::recode(house$JWRIP, "NA=0")
+house$JWTR = car::recode(house$JWTR, "NA=0")
+house$MARHT = car::recode(house$MARHT, "NA=0")
+house$PAOC = car::recode(house$PAOC, "NA=0")
+house$SCHL = car::recode(house$SCHL, "NA=0")
+house$WKHP = car::recode(house$WKHP, "NA=0")
+
+#rearrange order as:cat, num
+house = house %>% select(-c(AGEP, BDSP, NP, RMSP, JWMNP, PWGTP, WAGP, WKHP), everything())
+num_index = (length(colnames(house))-7):length(colnames(house))
+cat_index = (1:length(colnames(house)))[-num_index]
+```
+
+
+```{r}
+# recode variables
+## ACR 
+house$ACR = car::recode(house$ACR, "3=0")
+house$BLD = car::recode(house$BLD, "10=1; 4:9=4")
+house$HHL = car::recode(house$HHL, "3:5=3")
+house$HHT = car::recode(house$HHT, "2:3=2; 4:7=3")
+house$PARTNER = car::recode(house$PARTNER, "1:4=1")
+house$TEN = car::recode(house$TEN, "3:4=3")
+house$VEH = car::recode(house$VEH, "0:1=1; 4:6=4")
+house$YBL = car::recode(house$YBL, "9:22=9")
+house$COW = car::recode(house$COW, "3:5=3; 6:9=2")
+house$JWRIP = car::recode(house$JWRIP, "2:10=2")
+house$JWTR = car::recode(house$JWTR, "2:12=2")
+house$MAR = car::recode(house$MAR, "3:4=3; 5=4")
+house$PAOC = car::recode(house$PAOC, "1:3=1; 4=2")
+house$RAC1P = car::recode(house$RAC1P, "2:9=2")
+house$SCHL = car::recode(house$SCHL, "0:15=0; 22:24=22")
+```
+
+```{r}
+# recode variables to start from 0
+house_releveled = house
+for (j in cat_index) {
+  new_level = 0
+  for (i in sort(unique(house[,j]))) {
+    house_releveled[house[, j] == i, j] = new_level
+    new_level = new_level + 1
+  }
+}
+```
+
+```{r}
+# save
+write.csv(house_releveled, file.path(save_dir, "house_recoded.csv"), row.names = FALSE)
+```
