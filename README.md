@@ -7,6 +7,7 @@ Are deep learning models superior for missing data imputation in large surveys? 
 
 ## Datasets:
   - household: https://www2.census.gov/programs-surveys/acs/data/pums/2019/1-Year/
+    - processed data(https://drive.google.com/file/d/1j9KHLJeI4JPyjWcQ5r78hxG5493Msg8l/view?usp=sharing)
   - spam: https://archive.ics.uci.edu/ml/datasets/Spambase
   - letter: https://archive.ics.uci.edu/ml/datasets/Letter+Recognition
   - breast: https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)
