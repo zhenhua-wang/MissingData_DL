@@ -64,7 +64,7 @@ def gain (data_x, data_m, cat_index, num_index, all_levels, gain_parameters, num
     G_W3 = tf.Variable(xavier_init([h_Gdim, input_dim]))
     G_b3 = tf.Variable(tf.zeros(shape = [input_dim]))
 
-    theta_G = [G_W1, G_W3, G_b1, G_b3]
+    theta_G = [G_W1, G_W2, G_W3, G_b1, G_b2, G_b3]
 
     ## GAIN functions
     # Generator
