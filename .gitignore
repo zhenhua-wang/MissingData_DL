@@ -1,0 +1,6 @@
+utils/__pycache__/
+models/__pycache__/
+data/2018/
+
+data/house_person.csv
+data/house_recoded.csv
