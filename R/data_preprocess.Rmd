@@ -11,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r cars}
 library(tidyverse)
-source("./data_loader.R")
+source("./R/data_loader.R")
 ```
 
 # parameters
 
 ```{r}
-save_dir = "../data"
+save_dir = "./data"
 year = 2018
 ```
 
@@ -25,6 +25,7 @@ year = 2018
 # dowload and merge house and person data
 
 ```{r}
+options(timeout=10000)
 acs_downloader(year, save_dir)
 merged = acs_merge(year, save_dir, TRUE)
 ```
@@ -34,8 +35,8 @@ merged = acs_merge(year, save_dir, TRUE)
 ```{r}
 house = merged %>%
   dplyr::select(c(ACR, BDSP, BLD, HHL, HHT, HUGCL, HUPAC, HUPAOC, HUPARC, LNGI,
-                  MULTG, MV, NP, NR, PARTNER, PSF, R18, R65, RMSP, SRNT, SVAL, 
-                  TEN, VEH, WIF, YBL, 
+                  MULTG, MV, NP, NR, PARTNER, PSF, R18, R65, RMSP, SRNT, SVAL,
+                  TEN, VEH, WIF, YBL,
                   AGEP, COW, HINS1, HINS2, HINS3, JWMNP, JWRIP, JWTR, MAR, MARHT, PAOC, PWGTP, RAC1P,
                   SCHL, SEX, WAGP, WKHP,
                   LAPTOP, DIS, PRIVCOV, PUBCOV)) %>%
@@ -83,7 +84,7 @@ cat_index = (1:length(colnames(house)))[-num_index]
 
 ```{r}
 # recode variables
-## ACR 
+## ACR
 house$ACR = car::recode(house$ACR, "3=0")
 house$BLD = car::recode(house$BLD, "10=1; 4:9=4")
 house$HHL = car::recode(house$HHL, "3:5=3")
