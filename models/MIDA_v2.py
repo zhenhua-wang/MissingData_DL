@@ -174,6 +174,9 @@ def autoencoder_imputation(data_x, data_m, cat_index, num_index, all_levels, DAE
                 l, y_hat = optimize_step(batch_x, batch_m)
                 pbar.set_description("loss at epoch {}, phase 2: {:.3f}".format(i, l))
                 loss_list.append(l)
+                pass
+            imputed_data = decoder(encoder(data_train))
+            imputed_data = data_train_m * data_train + (1 - data_train_m) * imputed_data
 
         # get imputation
         imputed_data = decoder(encoder(imputed_data))
